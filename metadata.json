@@ -1,0 +1,5 @@
+{
+  "name": "Plantillas Auto",
+  "description": "A powerful image template editor allowing users to upload base images, add dynamic text layers, and position photos. Features real-time editing, draggable elements, and high-quality PNG export.",
+  "requestFramePermissions": []
+}
