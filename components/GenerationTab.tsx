@@ -15,8 +15,8 @@ const GenerationTab: React.FC<GenerationTabProps> = ({ theme, onAddImage }) => {
   const [error, setError] = useState<string | null>(null);
 
   const isDark = theme === 'dark';
-  // Updated model name to Gemini 2.0 Flash Experimental as per user request to avoid 2.5
-  const MODEL_NAME = 'gemini-2.0-flash-exp';
+  // Use gemini-2.5-flash-image for general image generation and editing tasks as per latest guidelines
+  const MODEL_NAME = 'gemini-2.5-flash-image';
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return;
@@ -25,7 +25,7 @@ const GenerationTab: React.FC<GenerationTabProps> = ({ theme, onAddImage }) => {
     setError(null);
     
     try {
-      // Create a new instance right before making an API call to ensure it uses the latest API key
+      // Create a new GoogleGenAI instance right before the call to ensure the latest API key is used
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: MODEL_NAME,
@@ -33,8 +33,6 @@ const GenerationTab: React.FC<GenerationTabProps> = ({ theme, onAddImage }) => {
           parts: [{ text: prompt }]
         },
         config: {
-          // Note: Image generation via generateContent with imageConfig is typically supported in 2.5/3.0 "banana" models.
-          // We are attempting it with 2.0 as requested.
           imageConfig: {
             aspectRatio: "1:1"
           }
@@ -42,7 +40,7 @@ const GenerationTab: React.FC<GenerationTabProps> = ({ theme, onAddImage }) => {
       });
 
       let imageBase64 = null;
-      // The output response may contain both image and text parts; iterate through all parts to find the image part.
+      // Iterate through parts to find the image part (inlineData) as it might not be the first part
       if (response.candidates && response.candidates[0]?.content?.parts) {
         for (const part of response.candidates[0].content.parts) {
           if (part.inlineData) {
@@ -55,7 +53,7 @@ const GenerationTab: React.FC<GenerationTabProps> = ({ theme, onAddImage }) => {
       if (imageBase64) {
         setGeneratedImage(imageBase64);
       } else {
-        throw new Error("No image data returned from model. Note: Image generation support might vary for the selected model version.");
+        throw new Error("No image data returned from model. Ensure the prompt describes a visual scene.");
       }
     } catch (err: any) {
       console.error("Image generation failed", err);

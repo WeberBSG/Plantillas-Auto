@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Plus, Save, Download, Trash2, Layout, Image as ImageIcon, Settings2, Grid, Lock, Unlock, Upload, X, PlusCircle, FilePlus, Sun, Moon, Menu } from 'lucide-react';
+import { Plus, Save, Download, Trash2, Layout, Image as ImageIcon, Settings2, Grid, Lock, Unlock, Upload, X, PlusCircle, FilePlus, Sun, Moon, Menu, Zap } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import CanvasArea from './components/CanvasArea';
 import { Template, CanvasElement, Styling } from './types';
@@ -333,7 +333,10 @@ const App: React.FC = () => {
             <div className="p-1.5 lg:p-2 bg-indigo-600 rounded-lg shadow-indigo-100 shadow-md">
               <Layout className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
             </div>
-            <h1 className="text-sm lg:text-lg font-extrabold tracking-tight truncate max-w-[120px] lg:max-w-none">Template Compositor</h1>
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-sm lg:text-lg font-extrabold tracking-tight truncate max-w-[120px] lg:max-w-none">Plantillas Auto</h1>
+              <Zap className="w-3.5 h-3.5 text-indigo-500" />
+            </div>
           </div>
 
           <div className={`hidden md:flex items-center gap-2 border-l pl-6 ${isDark ? 'border-gray-800' : 'border-gray-200'}`}>
