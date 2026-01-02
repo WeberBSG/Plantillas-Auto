@@ -1,6 +1,6 @@
 
 import React, { useRef, useState } from 'react';
-import { Plus, Trash2, Bold, Italic, Image as ImageIcon, Type, Lock, Unlock, Move, Download, Upload, FileJson, ChevronDown, ChevronRight, Settings2, RotateCw, Layers, Hash, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, MapPin, Copy, Check, Fingerprint, ImagePlus, Link, Link2Off, Square } from 'lucide-react';
+import { Plus, Trash2, Bold, Italic, Image as ImageIcon, Type, Lock, Unlock, Move, Download, Upload, FileJson, ChevronDown, ChevronRight, Settings2, RotateCw, Layers, Hash, ArrowUp, ArrowDown, ChevronsUp, ChevronsDown, MapPin, Copy, Check, Fingerprint, ImagePlus, Link, Link2Off, Square, RefreshCw } from 'lucide-react';
 import { Template, CanvasElement, Styling } from '../types';
 import { translations } from '../translations';
 
@@ -83,6 +83,20 @@ const Sidebar: React.FC<SidebarProps> = ({
     setDniCopied(false);
   };
 
+  const generateRandomIdString = () => {
+    // Generates '00' + 8 or 9 random digits
+    const length = Math.random() > 0.5 ? 9 : 8;
+    let digits = "";
+    for (let i = 0; i < length; i++) {
+      digits += Math.floor(Math.random() * 10);
+    }
+    return `00${digits}`;
+  };
+
+  const handleGenerateRandomId = (elementId: string) => {
+    onUpdateElement(elementId, { content: generateRandomIdString() });
+  };
+
   const copyAddressToClipboard = () => {
     if (!generatedAddress) return;
     navigator.clipboard.writeText(generatedAddress);
@@ -126,10 +140,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     const file = e.target.files?.[0];
     if (!file) return;
     readFileAsDataURL(file).then(data => onUpdateTemplate({ baseImage: data }));
-  };
-
-  const updateStyling = (id: string, current: Styling, updates: Partial<Styling>) => {
-    onUpdateElement(id, { styling: { ...current, ...updates } });
   };
 
   const handleWidthChange = (el: CanvasElement, newWidth: number) => {
@@ -301,8 +311,22 @@ const Sidebar: React.FC<SidebarProps> = ({
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        <textarea value={el.content} onChange={(e) => onUpdateElement(el.id, { content: e.target.value })} className="w-full p-2 text-sm border rounded bg-gray-900" rows={2} />
-                        <div className="flex items-center gap-2"><input type="checkbox" checked={el.showRandomGenerator} onChange={(e) => onUpdateElement(el.id, { showRandomGenerator: e.target.checked })} /> <span className="text-[10px] font-bold text-gray-500 uppercase">{t.enableRandomId}</span></div>
+                        <div className="flex items-center gap-2 mb-2">
+                          <textarea value={el.content} onChange={(e) => onUpdateElement(el.id, { content: e.target.value })} className="flex-1 p-2 text-sm border rounded bg-gray-900 min-h-[60px]" rows={2} />
+                          {el.showRandomGenerator && (
+                            <button 
+                              onClick={() => handleGenerateRandomId(el.id)} 
+                              className="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm transition-all"
+                              title={t.random}
+                            >
+                              <RefreshCw className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <input type="checkbox" checked={el.showRandomGenerator} onChange={(e) => onUpdateElement(el.id, { showRandomGenerator: e.target.checked })} /> 
+                          <span className="text-[10px] font-bold text-gray-500 uppercase">{t.enableRandomId}</span>
+                        </div>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-4">
