@@ -13,20 +13,17 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({ template, onUpdateElement, snap
   const viewportRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   
-  // Interaction State
   const [activeElementId, setActiveElementId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [naturalDimensions, setNaturalDimensions] = useState({ width: 0, height: 0 });
   const [containerWidth, setContainerWidth] = useState(0);
 
-  // Zoom and Pan State
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
 
-  // Handle Keyboard for Pan mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
@@ -256,7 +253,7 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({ template, onUpdateElement, snap
               ) : (
                 <img 
                   src={el.content} 
-                  alt="Overlay" 
+                  alt="Superposición" 
                   className="w-full h-full object-cover rounded shadow-sm" 
                   draggable={false} 
                   style={{ backgroundColor: 'transparent', borderRadius: `${(el.borderRadius || 0) * previewScale}px` }} 
@@ -276,16 +273,16 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({ template, onUpdateElement, snap
             onClick={() => { setPan({x: 0, y: 0}); setScale(1); }}
             className="pointer-events-auto px-3 py-1.5 bg-gray-800/90 text-white border border-gray-700 rounded-full text-[10px] font-bold uppercase hover:bg-gray-700 transition-colors"
           >
-            Reset View
+            Reiniciar Vista
           </button>
         )}
       </div>
 
       <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none opacity-40 hover:opacity-100 transition-opacity">
         <div className="bg-black/20 backdrop-blur-sm px-4 py-2 rounded-xl text-[10px] font-bold text-gray-400 uppercase tracking-widest flex gap-4">
-          <span>Ctrl + Wheel to Zoom</span>
+          <span>Ctrl + Rueda para Zoom</span>
           <span className="w-px bg-gray-700" />
-          <span>Space + Drag to Pan</span>
+          <span>Espacio + Arrastre para Desplazar</span>
         </div>
       </div>
     </div>

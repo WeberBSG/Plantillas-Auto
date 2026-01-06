@@ -39,7 +39,7 @@ const App: React.FC = () => {
         setTemplates(parsed);
         if (parsed.length > 0) setActiveTemplate(parsed[0]);
       } catch (e) {
-        console.error("Failed to parse templates", e);
+        console.error("Error al cargar plantillas", e);
       }
     }
 
@@ -68,7 +68,7 @@ const App: React.FC = () => {
       const baseImage = event.target?.result as string;
       const newTemplate: Template = {
         id: crypto.randomUUID(),
-        name: `Template ${templates.length + 1}`,
+        name: `Plantilla ${templates.length + 1}`,
         baseImage,
         baseOpacity: 1,
         baseRotation: 0,
@@ -79,7 +79,7 @@ const App: React.FC = () => {
           {
             id: crypto.randomUUID(),
             type: 'photo',
-            name: 'Base Overlay',
+            name: 'Capa Base',
             content: 'https://picsum.photos/400/300',
             x: 10,
             y: 10,
@@ -120,7 +120,7 @@ const App: React.FC = () => {
   const handleDeleteTemplate = () => {
     if (!activeTemplate) return;
     const templateToDelete = activeTemplate;
-    const confirmDelete = window.confirm(`Are you sure you want to delete the template "${templateToDelete.name}"?`);
+    const confirmDelete = window.confirm(`¿Estás seguro de que quieres eliminar la plantilla "${templateToDelete.name}"?`);
     if (!confirmDelete) return;
 
     setTemplates(prevTemplates => {
@@ -141,8 +141,8 @@ const App: React.FC = () => {
     const newElement: CanvasElement = {
       id: crypto.randomUUID(),
       type: 'text',
-      name: `Text ${activeTemplate.elements.filter(e => e.type === 'text').length + 1}`,
-      content: 'New Text Block',
+      name: `Texto ${activeTemplate.elements.filter(e => e.type === 'text').length + 1}`,
+      content: 'Nuevo Bloque de Texto',
       x: 40,
       y: 40,
       width: 400,
@@ -168,11 +168,10 @@ const App: React.FC = () => {
 
     const imgUrl = content || 'https://picsum.photos/200/200';
     
-    // Create element first
     const newElement: CanvasElement = {
       id: crypto.randomUUID(),
       type: 'photo',
-      name: `Photo ${activeTemplate.elements.filter(e => e.type === 'photo').length + 1}`,
+      name: `Foto ${activeTemplate.elements.filter(e => e.type === 'photo').length + 1}`,
       content: imgUrl,
       x: 20,
       y: 20,
@@ -190,7 +189,6 @@ const App: React.FC = () => {
       borderRadius: 0
     };
 
-    // Calculate actual aspect ratio
     const img = new Image();
     img.onload = () => {
       const ratio = img.naturalWidth / img.naturalHeight;
@@ -273,10 +271,10 @@ const App: React.FC = () => {
         if (imported.elements) {
           handleImportTemplate(imported);
         } else {
-          alert("Invalid template file.");
+          alert("Archivo de plantilla inválido.");
         }
       } catch (err) {
-        alert("Error parsing JSON.");
+        alert("Error al procesar el JSON.");
       }
     };
     reader.readAsText(file);
@@ -289,12 +287,12 @@ const App: React.FC = () => {
     try {
       const dataUrl = await generateExportImage(activeTemplate);
       const link = document.createElement('a');
-      link.download = `${activeTemplate.name.replace(/\s+/g, '_')}_export.png`;
+      link.download = `${activeTemplate.name.replace(/\s+/g, '_')}_exporte.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
-      console.error("Export failed", err);
-      alert("Failed to export image. Please ensure all images are loaded.");
+      console.error("Exportación fallida", err);
+      alert("Error al exportar imagen. Asegúrate de que todas las imágenes estén cargadas.");
     } finally {
       setIsExporting(false);
     }
@@ -343,28 +341,28 @@ const App: React.FC = () => {
             <button 
               onClick={triggerNewTemplate}
               className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${isDark ? 'text-gray-400 hover:text-indigo-400 hover:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
-              title="Start a new template"
+              title="Comenzar nueva plantilla"
             >
               <FilePlus className="w-4 h-4" />
-              <span className="hidden lg:inline">New</span>
+              <span className="hidden lg:inline">Nuevo</span>
             </button>
             {activeTemplate && (
               <>
                 <button 
                   onClick={closeActiveTemplate}
                   className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${isDark ? 'text-gray-400 hover:text-indigo-400 hover:bg-gray-800' : 'text-gray-500 hover:text-indigo-600 hover:bg-indigo-50'}`}
-                  title="Close editor"
+                  title="Cerrar editor"
                 >
                   <X className="w-4 h-4" />
-                  <span className="hidden lg:inline">Close</span>
+                  <span className="hidden lg:inline">Cerrar</span>
                 </button>
                 <button 
                   onClick={handleDeleteTemplate}
                   className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${isDark ? 'text-red-400 hover:text-red-300 hover:bg-red-900/20' : 'text-red-500 hover:text-red-700 hover:bg-red-50'}`}
-                  title="Delete this template"
+                  title="Eliminar esta plantilla"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span className="hidden lg:inline">Delete</span>
+                  <span className="hidden lg:inline">Eliminar</span>
                 </button>
               </>
             )}
@@ -375,7 +373,7 @@ const App: React.FC = () => {
           <button
             onClick={toggleTheme}
             className={`p-2 rounded-lg transition-all ${isDark ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            title={`Switch to ${isDark ? 'Light' : 'Dark'} Mode`}
+            title={`Cambiar a modo ${isDark ? 'Claro' : 'Oscuro'}`}
           >
             {isDark ? <Sun className="w-4 h-4 lg:w-5 lg:h-5" /> : <Moon className="w-4 h-4 lg:w-5 lg:h-5" />}
           </button>
@@ -386,7 +384,7 @@ const App: React.FC = () => {
               className={`p-1.5 lg:p-2 rounded flex items-center gap-2 text-[10px] lg:text-xs font-bold transition-all uppercase tracking-wide ${snapToGrid ? (isDark ? 'bg-gray-700 text-indigo-400 shadow-sm' : 'bg-white text-indigo-600 shadow-sm') : (isDark ? 'text-gray-500 hover:text-gray-400' : 'text-gray-500 hover:text-gray-700')}`}
             >
               <Grid className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-              <span className="hidden lg:inline">Snap Grid</span>
+              <span className="hidden lg:inline">Ajustar Cuadrícula</span>
             </button>
           </div>
 
@@ -399,7 +397,7 @@ const App: React.FC = () => {
               {isExporting ? '...' : (
                 <>
                   <Download className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-                  <span className="hidden sm:inline">Export PNG</span>
+                  <span className="hidden sm:inline">Exportar PNG</span>
                 </>
               )}
             </button>
@@ -431,9 +429,9 @@ const App: React.FC = () => {
                 <div className={`w-16 h-16 lg:w-20 lg:h-20 rounded-full flex items-center justify-center mb-6 ${isDark ? 'bg-gray-800' : 'bg-indigo-50'}`}>
                   <ImageIcon className={`w-8 h-8 lg:w-10 lg:h-10 ${isDark ? 'text-gray-600' : 'text-indigo-300'}`} />
                 </div>
-                <h2 className="text-xl font-extrabold mb-2">Welcome</h2>
+                <h2 className="text-xl font-extrabold mb-2">Bienvenido</h2>
                 <p className={`mb-8 px-4 text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Select a template or start fresh.
+                  Selecciona una plantilla o empieza una nueva.
                 </p>
                 
                 <div className="flex flex-col gap-3 w-full max-w-xs px-4">
@@ -442,12 +440,12 @@ const App: React.FC = () => {
                     className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-xl shadow-indigo-100 flex items-center justify-center gap-2"
                   >
                     <PlusCircle className="w-5 h-5" />
-                    Create Template
+                    Crear Plantilla
                   </button>
                   
                   <label className={`cursor-pointer block border font-bold py-3.5 px-6 rounded-2xl transition-all shadow-sm text-center ${isDark ? 'bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'}`}>
                     <Upload className="w-5 h-5 inline mr-2 text-indigo-500" />
-                    Import JSON
+                    Importar JSON
                     <input ref={importInputRef} type="file" className="hidden" accept=".json" onChange={handleJSONImportPrompt} />
                   </label>
                 </div>
@@ -458,7 +456,7 @@ const App: React.FC = () => {
               <div className={`mt-8 px-6 pb-12 ${!activeTemplate ? (isDark ? 'border-t border-gray-800 pt-8' : 'border-t border-gray-100 pt-8') : ''}`}>
                 <h3 className={`text-[11px] font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                   <Layout className="w-3 h-3" />
-                  Template Library
+                  Biblioteca de Plantillas
                 </h3>
                 <div className="grid gap-4">
                   {[...templates].sort((a,b) => b.lastModified - a.lastModified).map(t => (
@@ -475,7 +473,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <p className={`font-bold truncate mb-0.5 ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>{t.name}</p>
-                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{new Date(t.lastModified).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{new Date(t.lastModified).toLocaleDateString('es-AR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
                     </button>
                   ))}
@@ -499,7 +497,7 @@ const App: React.FC = () => {
               <div className={`inline-flex p-6 rounded-3xl shadow-xl mb-6 rotate-3 transition-colors duration-300 ${isDark ? 'bg-gray-900 shadow-black' : 'bg-white shadow-gray-200/50'}`}>
                 <Settings2 className={`w-12 h-12 lg:w-16 lg:h-16 ${isDark ? 'text-gray-700' : 'text-indigo-100'}`} />
               </div>
-              <p className={`text-base lg:text-lg font-bold ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Select a template to start editing</p>
+              <p className={`text-base lg:text-lg font-bold ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Selecciona una plantilla para comenzar a editar</p>
             </div>
           )}
         </main>
