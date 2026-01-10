@@ -13,17 +13,20 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({ template, onUpdateElement, snap
   const viewportRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   
+  // Interaction State
   const [activeElementId, setActiveElementId] = useState<string | null>(null);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [naturalDimensions, setNaturalDimensions] = useState({ width: 0, height: 0 });
   const [containerWidth, setContainerWidth] = useState(0);
 
+  // Zoom and Pan State
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [isPanning, setIsPanning] = useState(false);
   const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
 
+  // Handle Keyboard for Pan mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
@@ -180,7 +183,7 @@ const CanvasArea: React.FC<CanvasAreaProps> = ({ template, onUpdateElement, snap
         <img 
           ref={imgRef} 
           src={template.baseImage} 
-          alt="Base template" 
+          alt="Plantilla base" 
           className={`block w-full h-auto max-h-[calc(100vh-160px)] object-contain transition-all ${activeElementId === 'base' ? 'ring-2 ring-indigo-500' : ''}`} 
           draggable={false} 
           onLoad={handleImageLoad}

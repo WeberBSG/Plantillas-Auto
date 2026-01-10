@@ -39,7 +39,7 @@ const App: React.FC = () => {
         setTemplates(parsed);
         if (parsed.length > 0) setActiveTemplate(parsed[0]);
       } catch (e) {
-        console.error("Error al cargar plantillas", e);
+        console.error("Error al analizar las plantillas", e);
       }
     }
 
@@ -79,7 +79,7 @@ const App: React.FC = () => {
           {
             id: crypto.randomUUID(),
             type: 'photo',
-            name: 'Capa Base',
+            name: 'Superposición Base',
             content: 'https://picsum.photos/400/300',
             x: 10,
             y: 10,
@@ -142,7 +142,7 @@ const App: React.FC = () => {
       id: crypto.randomUUID(),
       type: 'text',
       name: `Texto ${activeTemplate.elements.filter(e => e.type === 'text').length + 1}`,
-      content: 'Nuevo Bloque de Texto',
+      content: 'Nuevo bloque de texto',
       x: 40,
       y: 40,
       width: 400,
@@ -274,7 +274,7 @@ const App: React.FC = () => {
           alert("Archivo de plantilla inválido.");
         }
       } catch (err) {
-        alert("Error al procesar el JSON.");
+        alert("Error al analizar el JSON.");
       }
     };
     reader.readAsText(file);
@@ -287,12 +287,12 @@ const App: React.FC = () => {
     try {
       const dataUrl = await generateExportImage(activeTemplate);
       const link = document.createElement('a');
-      link.download = `${activeTemplate.name.replace(/\s+/g, '_')}_exporte.png`;
+      link.download = `${activeTemplate.name.replace(/\s+/g, '_')}_exportar.png`;
       link.href = dataUrl;
       link.click();
     } catch (err) {
       console.error("Exportación fallida", err);
-      alert("Error al exportar imagen. Asegúrate de que todas las imágenes estén cargadas.");
+      alert("Error al exportar la imagen. Asegúrate de que todas las fotos estén cargadas.");
     } finally {
       setIsExporting(false);
     }
@@ -341,7 +341,7 @@ const App: React.FC = () => {
             <button 
               onClick={triggerNewTemplate}
               className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-lg transition-all ${isDark ? 'text-gray-400 hover:text-indigo-400 hover:bg-gray-800' : 'text-gray-600 hover:text-indigo-600 hover:bg-indigo-50'}`}
-              title="Comenzar nueva plantilla"
+              title="Comenzar una nueva plantilla"
             >
               <FilePlus className="w-4 h-4" />
               <span className="hidden lg:inline">Nuevo</span>
@@ -362,7 +362,7 @@ const App: React.FC = () => {
                   title="Eliminar esta plantilla"
                 >
                   <Trash2 className="w-4 h-4" />
-                  <span className="hidden lg:inline">Eliminar</span>
+                  <span className="hidden lg:inline">Borrar</span>
                 </button>
               </>
             )}
@@ -373,7 +373,7 @@ const App: React.FC = () => {
           <button
             onClick={toggleTheme}
             className={`p-2 rounded-lg transition-all ${isDark ? 'bg-gray-800 text-yellow-400 hover:bg-gray-700' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
-            title={`Cambiar a modo ${isDark ? 'Claro' : 'Oscuro'}`}
+            title={`Cambiar a modo ${isDark ? 'claro' : 'oscuro'}`}
           >
             {isDark ? <Sun className="w-4 h-4 lg:w-5 lg:h-5" /> : <Moon className="w-4 h-4 lg:w-5 lg:h-5" />}
           </button>
@@ -384,7 +384,7 @@ const App: React.FC = () => {
               className={`p-1.5 lg:p-2 rounded flex items-center gap-2 text-[10px] lg:text-xs font-bold transition-all uppercase tracking-wide ${snapToGrid ? (isDark ? 'bg-gray-700 text-indigo-400 shadow-sm' : 'bg-white text-indigo-600 shadow-sm') : (isDark ? 'text-gray-500 hover:text-gray-400' : 'text-gray-500 hover:text-gray-700')}`}
             >
               <Grid className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
-              <span className="hidden lg:inline">Ajustar Cuadrícula</span>
+              <span className="hidden lg:inline">Grilla</span>
             </button>
           </div>
 
@@ -431,7 +431,7 @@ const App: React.FC = () => {
                 </div>
                 <h2 className="text-xl font-extrabold mb-2">Bienvenido</h2>
                 <p className={`mb-8 px-4 text-sm leading-relaxed ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Selecciona una plantilla o empieza una nueva.
+                  Selecciona una plantilla o comienza una nueva.
                 </p>
                 
                 <div className="flex flex-col gap-3 w-full max-w-xs px-4">
@@ -456,7 +456,7 @@ const App: React.FC = () => {
               <div className={`mt-8 px-6 pb-12 ${!activeTemplate ? (isDark ? 'border-t border-gray-800 pt-8' : 'border-t border-gray-100 pt-8') : ''}`}>
                 <h3 className={`text-[11px] font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
                   <Layout className="w-3 h-3" />
-                  Biblioteca de Plantillas
+                  Librería de Plantillas
                 </h3>
                 <div className="grid gap-4">
                   {[...templates].sort((a,b) => b.lastModified - a.lastModified).map(t => (
@@ -473,7 +473,7 @@ const App: React.FC = () => {
                       </div>
                       <div className="flex-1 overflow-hidden">
                         <p className={`font-bold truncate mb-0.5 ${isDark ? 'text-gray-100' : 'text-gray-800'}`}>{t.name}</p>
-                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{new Date(t.lastModified).toLocaleDateString('es-AR', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                        <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-wider">{new Date(t.lastModified).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                       </div>
                     </button>
                   ))}

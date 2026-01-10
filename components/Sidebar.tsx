@@ -20,10 +20,10 @@ const BLEND_MODES = [
   { value: 'normal', label: 'Normal' },
   { value: 'multiply', label: 'Multiplicar' },
   { value: 'darken', label: 'Oscurecer' },
-  { value: 'color-burn', label: 'Subexponer Color' },
-  { value: 'linear-burn', label: 'Subexposición Lineal' },
-  { value: 'screen', label: 'Trama' },
-  { value: 'overlay', label: 'Superponer' },
+  { value: 'color-burn', label: 'Color Burn' },
+  { value: 'linear-burn', label: 'Linear Burn' },
+  { value: 'screen', label: 'Trama (Screen)' },
+  { value: 'overlay', label: 'Superponer (Overlay)' },
   { value: 'lighten', label: 'Aclarar' },
 ];
 
@@ -127,6 +127,40 @@ const Sidebar: React.FC<SidebarProps> = ({
     readFileAsDataURL(file).then(data => onUpdateTemplate({ baseImage: data }));
   };
 
+  const handleDropToReplace = async (e: React.DragEvent, element: CanvasElement) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDraggingOverLayerId(null);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const data = await readFileAsDataURL(file);
+      const img = new Image();
+      img.onload = () => {
+        const ratio = img.naturalWidth / img.naturalHeight;
+        onUpdateElement(element.id, { 
+          content: data, 
+          aspectRatio: ratio,
+          height: element.keepAspectRatio ? element.width / ratio : element.height
+        });
+      };
+      img.src = data;
+    }
+  };
+
+  const handleDropToCreate = async (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDraggingOverList(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const data = await readFileAsDataURL(file);
+      onAddPhoto(data);
+    }
+  };
+
+  const updateStyling = (id: string, current: Styling, updates: Partial<Styling>) => {
+    onUpdateElement(id, { styling: { ...current, ...updates } });
+  };
+
   const handleWidthChange = (el: CanvasElement, newWidth: number) => {
     const updates: Partial<CanvasElement> = { width: newWidth };
     const ratio = el.aspectRatio || (el.width / el.height);
@@ -154,13 +188,6 @@ const Sidebar: React.FC<SidebarProps> = ({
     onUpdateElement(el.id, updates);
   };
 
-  // Add missing updateStyling function to fix "Cannot find name 'updateStyling'" errors
-  const updateStyling = (id: string, currentStyling: Styling, updates: Partial<Styling>) => {
-    onUpdateElement(id, {
-      styling: { ...currentStyling, ...updates }
-    });
-  };
-
   const handleExportJSON = () => {
     const dataStr = JSON.stringify(template, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -186,7 +213,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           alert("Formato de archivo de plantilla inválido.");
         }
       } catch (err) {
-        alert("Error al procesar el archivo de plantilla.");
+        alert("Error al analizar el archivo de plantilla.");
       }
     };
     reader.readAsText(file);
@@ -194,10 +221,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   const generateRandomNumber = (element: CanvasElement) => {
-    const min = 40000000;
-    const max = 70000000;
-    const randomNum = Math.floor(Math.random() * (max - min + 1)) + min;
-    onUpdateElement(element.id, { content: randomNum.toString() });
+    // Regla: '00' o '000' + 8 dígitos aleatorios
+    const prefix = Math.random() < 0.5 ? '00' : '000';
+    // Generar un número de 8 dígitos (del 10,000,000 al 99,999,999)
+    const randomEightDigits = Math.floor(10000000 + Math.random() * 90000000).toString();
+    onUpdateElement(element.id, { content: prefix + randomEightDigits });
   };
 
   const inputClasses = `w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-semibold shadow-none ${isDark ? 'bg-gray-800 border-gray-700 text-gray-100 placeholder-gray-500' : 'bg-white border-gray-200 text-gray-800 placeholder-gray-400'}`;
@@ -253,6 +281,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
+      {/* Mini Generadores */}
       <div className={`mb-8 p-3 rounded-xl border space-y-4 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-gray-50 border-gray-100'}`}>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -261,7 +290,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={generateRandomAddress}
               className="px-2 py-1 bg-indigo-600 text-white text-[9px] font-bold rounded-md hover:bg-indigo-700 transition-colors uppercase active:scale-95"
             >
-              AL AZAR
+              ALEATORIO
             </button>
           </div>
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -289,7 +318,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={generateRandomDni}
               className="px-2 py-1 bg-indigo-600 text-white text-[9px] font-bold rounded-md hover:bg-indigo-700 transition-colors uppercase active:scale-95"
             >
-              AL AZAR
+              ALEATORIO
             </button>
           </div>
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
@@ -332,7 +361,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <span className={`text-xs font-extrabold truncate uppercase tracking-wide ${isDark ? 'text-indigo-400' : 'text-indigo-600'}`}>Fondo del Lienzo</span>
                 {!baseIsExpanded && (
                   <span className="text-[10px] text-gray-500 flex items-center gap-1">
-                    Capa de Sistema • Opacidad:{Math.round((template.baseOpacity ?? 1) * 100)}%
+                    Capa del Sistema • Opacidad:{Math.round((template.baseOpacity ?? 1) * 100)}%
                   </span>
                 )}
               </div>
@@ -393,7 +422,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between mb-1">
-                      <label className={`${subLabelClasses} flex items-center gap-1`}><Square className="w-2.5 h-2.5" /> Bordes Redond.</label>
+                      <label className={`${subLabelClasses} flex items-center gap-1`}><Square className="w-2.5 h-2.5" /> Bordes Redondos</label>
                       <input type="number" min="0" max="500" value={template.baseBorderRadius || 0} onChange={(e) => onUpdateTemplate({ baseBorderRadius: parseInt(e.target.value) })} className={`w-14 text-[10px] font-bold text-indigo-600 rounded text-center p-0.5 border ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'}`} />
                     </div>
                     <input type="range" min="0" max="500" step="1" value={template.baseBorderRadius || 0} onChange={(e) => onUpdateTemplate({ baseBorderRadius: parseInt(e.target.value) })} className="w-full h-1.5 bg-indigo-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
@@ -409,6 +438,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div 
           className={`space-y-3 transition-all duration-200 rounded-2xl ${isDraggingOverList ? (isDark ? 'bg-indigo-950/20 ring-2 ring-indigo-500 ring-dashed p-2' : 'bg-indigo-50/50 ring-2 ring-indigo-500 ring-dashed p-2') : ''}`}
+          onDragOver={(e) => { e.preventDefault(); setIsDraggingOverList(true); }}
+          onDragLeave={() => setIsDraggingOverList(false)}
+          onDrop={handleDropToCreate}
         >
           {sortedElements.map((el, idx) => {
             const isExpanded = el.isExpanded ?? true;
@@ -419,6 +451,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               <div 
                 key={el.id} 
                 className={`${cardClasses(isExpanded)} ${isDraggingOver ? 'ring-4 ring-indigo-400 ring-opacity-50' : ''}`}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); setDraggingOverLayerId(el.id); }}
+                onDragLeave={() => setDraggingOverLayerId(null)}
+                onDrop={(e) => isPhoto ? handleDropToReplace(e, el) : null}
               >
                 <div 
                   className={`flex items-center justify-between cursor-pointer ${!isExpanded ? 'p-3' : `mb-4 border-b pb-3 ${isDark ? 'border-gray-700' : 'border-indigo-50'}`}`}
@@ -452,14 +487,14 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <button 
                         onClick={() => onReorderElement(el.id, 'forward')}
                         className={`p-1 hover:bg-indigo-50 transition-colors ${isDark ? 'text-gray-500 hover:text-indigo-400 hover:bg-gray-800' : 'text-gray-400 hover:text-indigo-600'}`}
-                        title="Traer al Frente"
+                        title="Traer adelante"
                       >
                         <ArrowUp className="w-3.5 h-3.5" />
                       </button>
                       <button 
                         onClick={() => onReorderElement(el.id, 'backward')}
                         className={`p-1 hover:bg-indigo-50 transition-colors ${isDark ? 'text-gray-500 hover:text-indigo-400 hover:bg-gray-800' : 'text-gray-400 hover:text-indigo-600'}`}
-                        title="Enviar Atrás"
+                        title="Enviar atrás"
                       >
                         <ArrowDown className="w-3.5 h-3.5" />
                       </button>
@@ -484,7 +519,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <div className="space-y-4 animate-in slide-in-from-top-1 duration-200">
                     <div className="flex gap-4">
                       <div className="flex-1">
-                        <label className={subLabelClasses}>Nombre de Capa</label>
+                        <label className={subLabelClasses}>Nombre Capa</label>
                         <input 
                           type="text"
                           value={el.name || ''}
@@ -496,8 +531,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                       <div>
                         <label className={subLabelClasses}>Jerarquía</label>
                         <div className="flex gap-1">
-                          <button onClick={() => onReorderElement(el.id, 'front')} className={`p-1.5 border rounded-lg transition-colors ${isDark ? 'border-gray-700 hover:bg-gray-700 text-indigo-400' : 'border-gray-100 hover:bg-gray-50 text-indigo-600'}`} title="Al Frente"><ChevronsUp className="w-4 h-4" /></button>
-                          <button onClick={() => onReorderElement(el.id, 'back')} className={`p-1.5 border rounded-lg transition-colors ${isDark ? 'border-gray-700 hover:bg-gray-700 text-indigo-400' : 'border-gray-100 hover:bg-gray-50 text-indigo-600'}`} title="Al Fondo"><ChevronsDown className="w-4 h-4" /></button>
+                          <button onClick={() => onReorderElement(el.id, 'front')} className={`p-1.5 border rounded-lg transition-colors ${isDark ? 'border-gray-700 hover:bg-gray-700 text-indigo-400' : 'border-gray-100 hover:bg-gray-50 text-indigo-600'}`} title="Al frente"><ChevronsUp className="w-4 h-4" /></button>
+                          <button onClick={() => onReorderElement(el.id, 'back')} className={`p-1.5 border rounded-lg transition-colors ${isDark ? 'border-gray-700 hover:bg-gray-700 text-indigo-400' : 'border-gray-100 hover:bg-gray-50 text-indigo-600'}`} title="Al fondo"><ChevronsDown className="w-4 h-4" /></button>
                         </div>
                       </div>
                     </div>
@@ -548,7 +583,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                               <button 
                                 onClick={() => handleToggleAspectRatio(el)}
                                 className={`p-1.5 border rounded transition-all ${el.keepAspectRatio ? 'bg-indigo-600 text-white border-indigo-600' : 'text-gray-400 border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800'}`}
-                                title="Bloquear Proporción"
+                                title="Bloquear Relación de Aspecto"
                               >
                                 {el.keepAspectRatio ? <Link className="w-3.5 h-3.5" /> : <Link2Off className="w-3.5 h-3.5" />}
                               </button>
@@ -572,7 +607,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             </div>
                             <div>
                               <div className="flex items-center justify-between mb-1">
-                                <label className={`${subLabelClasses} flex items-center gap-1`}><Square className="w-2.5 h-2.5" /> Bordes Redond.</label>
+                                <label className={`${subLabelClasses} flex items-center gap-1`}><Square className="w-2.5 h-2.5" /> Bordes Redondos</label>
                                 <input type="number" min="0" max="500" value={el.borderRadius || 0} onChange={(e) => onUpdateElement(el.id, { borderRadius: parseInt(e.target.value) })} className={`w-14 text-[10px] font-bold text-indigo-600 rounded text-center p-0.5 border ${isDark ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-100'}`} />
                               </div>
                               <input type="range" min="0" max="500" step="1" value={el.borderRadius || 0} onChange={(e) => onUpdateElement(el.id, { borderRadius: parseInt(e.target.value) })} className="w-full h-1.5 bg-indigo-100 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
@@ -592,7 +627,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                               onChange={(e) => onUpdateElement(el.id, { showRandomGenerator: e.target.checked })}
                               className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
                             />
-                            <span className={`text-[10px] font-bold uppercase ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Habilitar ID Azar</span>
+                            <span className={`text-[10px] font-bold uppercase ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>Habilitar ID Aleatorio</span>
                           </label>
                           {el.showRandomGenerator && (
                             <button 
@@ -680,7 +715,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       {template.elements.length === 0 && !template.baseImage && (
         <div className={`mt-10 py-12 text-center border-2 border-dashed rounded-2xl ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
           <Settings2 className={`w-10 h-10 mx-auto mb-3 ${isDark ? 'text-gray-800' : 'text-gray-200'}`} />
-          <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>Sin elementos aún.<br/>Usa los botones superiores para añadir capas.</p>
+          <p className={`text-sm ${isDark ? 'text-gray-600' : 'text-gray-400'}`}>No hay elementos todavía.<br/>Usa los botones de arriba para añadir capas.</p>
         </div>
       )}
     </div>
